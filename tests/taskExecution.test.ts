@@ -361,6 +361,17 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
       const res = resolveSchedule('in 3 days', ref)
       assert.strictEqual(res.scheduledAt, '2026-10-23')
     })
+
+    it('resolves tonight at an explicit 10:00 time as 10 PM on the local day', () => {
+      const ref = new Date(2026, 9, 26, 12, 0, 0)
+      const res = resolveSchedule('Tonight at 10:00. Today.', ref)
+      assert.ok(res.scheduledAt)
+      assert.strictEqual(new Date(res.scheduledAt).getFullYear(), 2026)
+      assert.strictEqual(new Date(res.scheduledAt).getMonth(), 9)
+      assert.strictEqual(new Date(res.scheduledAt).getDate(), 26)
+      assert.strictEqual(new Date(res.scheduledAt).getHours(), 22)
+      assert.strictEqual(new Date(res.scheduledAt).getMinutes(), 0)
+    })
   })
 
   describe('4. Truthfulness & Supabase Persistence Failures', () => {

@@ -1110,8 +1110,22 @@ export function resolveSchedule(
     timeHours = 0
     timeMinutes = 0
   } else if (/\b(?:tonight|this\s+evening)\b/i.test(lower)) {
-    timeHours = 19
-    timeMinutes = 0
+    const explicitMeridianTime = lower.match(/(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)\b/)
+    const explicitClockTime = lower.match(/(?:at\s+)?(\d{1,2}):(\d{2})\b/)
+    if (explicitMeridianTime) {
+      let hours = Number(explicitMeridianTime[1])
+      if (explicitMeridianTime[3].startsWith('p') && hours < 12) hours += 12
+      if (explicitMeridianTime[3].startsWith('a') && hours === 12) hours = 0
+      timeHours = hours
+      timeMinutes = Number(explicitMeridianTime[2] ?? 0)
+    } else if (explicitClockTime) {
+      const hours = Number(explicitClockTime[1])
+      timeHours = hours >= 1 && hours <= 11 ? hours + 12 : hours
+      timeMinutes = Number(explicitClockTime[2])
+    } else {
+      timeHours = 19
+      timeMinutes = 0
+    }
   } else if (/\bthis\s+afternoon\b/i.test(lower)) {
     timeHours = 14
     timeMinutes = 0
@@ -1270,7 +1284,7 @@ export function extractStructuredActionDetails(
   const isTask =
     !isNote &&
     (isReminder ||
-      /^(?:please\s+)?(?:in\s+[^,]+,\s*)?(?:can\s+you\s+)?(?:create|add|schedule|set\s+up|set|make|put|insert|save)\s+(?:a\s+|an\s+)?(?:new\s+|quick\s+|urgent\s+|daily\s+|[a-zA-Z0-9_-]+\s+)?(?:task|reminder|to-do|todo)\b/i.test(text) ||
+      /^(?:please\s+)?(?:(?:i\s+(?:need|want)\s+you\s+to|i\s+would\s+like\s+you\s+to|could\s+you|can\s+you)\s+)?(?:in\s+[^,]+,\s*)?(?:can\s+you\s+)?(?:create|add|schedule|set\s+up|set|make|put|insert|save)\s+(?:a\s+|an\s+)?(?:new\s+|quick\s+|urgent\s+|daily\s+|[a-zA-Z0-9_-]+\s+)?(?:task|reminder|to-do|todo)\b/i.test(text) ||
       /^(?:please\s+)?(?:add|put)\s+(?:to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan)|.+?\s+to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan))\b/i.test(text) ||
       /^(?:schedule\s+task\b|task\s*:|new\s+task\s*:|todo\s*:|to-do\s*:)/i.test(text) ||
       /^(?:please\s+)?(?:can\s+you\s+)?(?:set|create|schedule)\s+(?:a\s+)?task\s+(?:for\s+(?:you|me)\s+to|to)\s+/i.test(text))
@@ -1382,7 +1396,7 @@ export function extractStructuredActionDetails(
   // Strip action prefix if still present
   workingText = workingText
     .replace(
-      /^(?:please\s+)?(?:can\s+you\s+)?(?:user\s+requested|requested|create|add|save|take|schedule|set\s+up|set|make|store|record)\s+(?:a\s+|an\s+)?(?:new\s+|personal\s+|project\s+|quick\s+|voice\s+|urgent\s+|daily\s+|[a-zA-Z0-9_-]+\s+)?(?:note|knowledge|document|task|memo|voice\s+note|voice\s+memo)(?:\s+(?:for\s+(?:you|me)\s+to|to|for)\b|\s*:\s*|\s+in\s+(?:my\s+)?personal|\s+|$)/i,
+      /^(?:please\s+)?(?:(?:i\s+(?:need|want)\s+you\s+to|i\s+would\s+like\s+you\s+to|could\s+you|can\s+you)\s+)?(?:user\s+requested|requested|create|add|save|take|schedule|set\s+up|set|make|store|record)\s+(?:a\s+|an\s+)?(?:new\s+|personal\s+|project\s+|quick\s+|voice\s+|urgent\s+|daily\s+|[a-zA-Z0-9_-]+\s+)?(?:note|knowledge|document|task|reminder|to-do|todo|memo|voice\s+note|voice\s+memo)\b(?:\s+(?:for\s+(?:you|me)\s+to|to|for)\b|\s*:\s*|\s+in\s+(?:my\s+)?personal|\s+|[.!?]+\s*|$)/i,
       ''
     )
     .replace(/^(?:personal|project|quick|voice)?\s*(?:note|voice\s+note|voice\s+memo)(?:\s+in\s+(?:my\s+)?personal)?(?:\s*:\s*|\s+|$)/i, '')
@@ -1391,6 +1405,9 @@ export function extractStructuredActionDetails(
     .replace(/^(?:please\s+)?set\s+(?:a\s+)?reminder(?:\s+at\s+[^to]+)?\s+(?:to\s+)?/i, '')
     .replace(/^(?:please\s+)?(?:add|put)\s+to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan)(?:\s*:\s*|\s+)/i, '')
     .replace(/^(?:task|new\s+task|reminder|to-do|todo)\s*:\s*/i, '')
+    .replace(/^[\s.,;:!?]+/, '')
+    .replace(/^(?:(?:that|and)\s+)?i\s+(?:need|want)\s+to\s+/i, '')
+    .replace(/^(?:(?:that|and)\s+)?i(?:'d|\s+would)\s+like\s+to\s+/i, '')
     .trim()
 
   const addToTasksTrailingMatch = workingText.match(/^(?:add\s+|put\s+)?(.+?)\s+to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan)[.!?]*$/i)
@@ -1476,6 +1493,8 @@ export function extractStructuredActionDetails(
     .replace(/\b(?:tomorrow|today|yesterday|on\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/gi, '')
     .replace(/\b(?:this\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)|next\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/gi, '')
     .replace(/\b(?:at\s+(?:\d{1,2}(?::\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)|\d{1,2}:\d{2}|noon|midnight))\b/gi, '')
+    .replace(/\b(?:tonight|this\s+evening|this\s+afternoon|this\s+morning)\b/gi, '')
+    .replace(/[.!?]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 
@@ -1735,7 +1754,7 @@ export function parseActionPlan(
   const isReminder = /^(?:please\s+)?(?:in\s+[^,]+,\s*)?(?:remind\s+me(?:\s+to)?|set\s+(?:a\s+)?reminder)\b/i.test(lower)
   const isTaskCreation =
     isReminder ||
-    /^(?:please\s+)?(?:in\s+[^,]+,\s*)?(?:can\s+you\s+)?(?:create|add|schedule|set\s+up|set|make|put|insert|save)\s+(?:a\s+|an\s+)?(?:new\s+|quick\s+|urgent\s+|daily\s+|[a-zA-Z0-9_-]+\s+)?(?:task|reminder|to-do|todo)\b/i.test(
+    /^(?:please\s+)?(?:(?:i\s+(?:need|want)\s+you\s+to|i\s+would\s+like\s+you\s+to|could\s+you|can\s+you)\s+)?(?:in\s+[^,]+,\s*)?(?:can\s+you\s+)?(?:create|add|schedule|set\s+up|set|make|put|insert|save)\s+(?:a\s+|an\s+)?(?:new\s+|quick\s+|urgent\s+|daily\s+|[a-zA-Z0-9_-]+\s+)?(?:task|reminder|to-do|todo)\b/i.test(
       lower
     ) ||
     /^(?:please\s+)?(?:add|put)\s+(?:to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan)|.+?\s+to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan))\b/i.test(lower) ||

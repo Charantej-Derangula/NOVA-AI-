@@ -206,6 +206,20 @@ describe('Conversational Action-Execution, Persistence & Mobile Navigation Suite
       assert.strictEqual(tasks[0].title.toLowerCase(), 'buy groceries')
     })
 
+    test('voice-style request creates the movie task for today at 10 PM', async () => {
+      const { ctx, tasks } = createMockContext()
+      ctx.prompt = 'I need you to create a task. That I need to go to a movie. Tonight at 10:00. Today.'
+
+      const result = await executeActionIntent(ctx)
+
+      assert.strictEqual(result.handled, true)
+      assert.strictEqual(result.status, 'executed')
+      assert.ok(result.recordId)
+      assert.strictEqual(tasks.length, 1)
+      assert.strictEqual(tasks[0].title.toLowerCase(), 'go to a movie')
+      assert.match(displayTime(tasks[0].scheduledAt), /10:00\s*PM/i)
+    })
+
     test('failed persistence reports failure truthfully and never claims false success', async () => {
       const { ctx, tasks } = createMockContext({
         onAddTask: async () => {
