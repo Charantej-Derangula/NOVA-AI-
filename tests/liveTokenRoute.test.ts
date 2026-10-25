@@ -2,6 +2,7 @@ import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 import handler from '../api/live-token.ts'
 import type http from 'node:http'
+import { readFileSync } from 'node:fs'
 
 interface MockResponse {
   statusCode: number
@@ -41,6 +42,12 @@ function createMockResponse(): MockResponse {
 }
 
 describe('Vercel /api/live-token Serverless Function Route', () => {
+  test('packages server-side modules used by Vercel API functions', () => {
+    const vercelConfig = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'))
+
+    assert.equal(vercelConfig.functions['api/**/*.ts'].includeFiles, 'server/**')
+  })
+
   test('handles OPTIONS request with 204 and CORS headers', async () => {
     const req = { method: 'OPTIONS', headers: {} } as unknown as http.IncomingMessage
     const res = createMockResponse()
