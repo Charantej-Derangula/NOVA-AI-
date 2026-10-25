@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --color-nova-bg: #08090b;
+  --color-nova-surface: #0f1014;
+  --color-nova-elevated: #15171e;
+  --color-nova-border: rgba(255, 255, 255, 0.07);
+  --color-nova-border-subtle: rgba(255, 255, 255, 0.04);
+  --color-nova-accent: #8b5cf6;
+  --color-nova-accent-hover: #7c3aed;
+  --color-nova-accent-subtle: rgba(139, 92, 246, 0.1);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    scrollbar-color: rgba(184, 155, 209, 0.45) rgba(255, 255, 255, 0.025);
+    scrollbar-width: thin;
+
+    /* Canonical typography scale (desktop baseline: 15px) */
+    --nova-font-sans: var(--font-sans);
+    --nova-font-mono: var(--font-mono);
+
+    --nova-type-2xs: 11px;
+    --nova-type-xs: 12px;
+    --nova-type-sm: 13px;
+    --nova-type-base: 15px;
+    --nova-type-md: 16px;
+    --nova-type-lg: 18px;
+    --nova-type-xl: 20px;
+    --nova-type-2xl: 24px;
+    --nova-type-3xl: 26px;
+
+    /* Semantic alias tokens for legacy rules */
+    --nova-type-micro: 11px;
+    --nova-type-caption: 12px;
+    --nova-type-support: 13px;
+    --nova-type-control: 13.5px;
+    --nova-type-body: 15px;
+
+    --nova-lh-tight: 1.25;
+    --nova-lh-snug: 1.35;
+    --nova-lh-normal: 1.5;
+    --nova-lh-relaxed: 1.62;
+  }
+
+  html {
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #08090b;
+    color: #ded8e6;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    letter-spacing: normal;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    line-height: 1.28;
+    letter-spacing: -0.018em;
+    color: #ffffff;
+  }
+
+  code, kbd, samp, pre {
+    font-family: var(--font-mono);
+  }
+
+  /* Refined minimal scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.16);
+  }
+}
+
+/* Subtle soundwave keyframes for voice recording */
+@keyframes soundwave {
+  0%, 100% {
+    height: 4px;
+  }
+  50% {
+    height: 14px;
+  }
+}
+
+.animate-wave-1 {
+  animation: soundwave 1s ease-in-out infinite;
+}
+.animate-wave-2 {
+  animation: soundwave 1.1s ease-in-out 0.15s infinite;
+}
+.animate-wave-3 {
+  animation: soundwave 0.9s ease-in-out 0.3s infinite;
+}
+.animate-wave-4 {
+  animation: soundwave 1.2s ease-in-out 0.45s infinite;
+}

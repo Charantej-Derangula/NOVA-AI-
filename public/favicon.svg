@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 141 120" fill="none">
+  <defs>
+    <linearGradient id="nova-diag" x1="0" y1="0" x2="141" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7c5edf" />
+      <stop offset="45%" stop-color="#d0bafc" />
+      <stop offset="55%" stop-color="#d0bafc" />
+      <stop offset="100%" stop-color="#6d4fdb" />
+    </linearGradient>
+    <linearGradient id="nova-left" x1="0" y1="50" x2="21.4" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5540af" />
+      <stop offset="50%" stop-color="#8b6cf0" />
+      <stop offset="100%" stop-color="#c8b2f9" />
+    </linearGradient>
+    <linearGradient id="nova-right" x1="119.6" y1="0" x2="141" y2="68" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#d8c6fa" />
+      <stop offset="50%" stop-color="#9374f3" />
+      <stop offset="100%" stop-color="#5d47ba" />
+    </linearGradient>
+  </defs>
+  <!-- Lower Left Pillar -->
+  <path d="M 0 50 L 21.4 71.4 L 21.4 118 C 14 112 0 105 0 95 Z" fill="url(#nova-left)" />
+  <!-- Upper Right Pillar -->
+  <path d="M 141 68 L 119.6 46.6 L 119.6 0 C 127 6 141 13 141 23 Z" fill="url(#nova-right)" />
+  <!-- Central Diagonal Stroke -->
+  <path d="M 2.5 0 C 18 1 38 6 58 20 L 115 93 C 123 103 132 110 138.5 118 C 123 117 103 112 83 98 L 26 25 C 18 15 9 8 2.5 0 Z" fill="url(#nova-diag)" />
+</svg>
