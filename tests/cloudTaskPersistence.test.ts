@@ -99,6 +99,7 @@ describe('NOVA — Cloud Task Persistence, Hydration & Sync Status Suite', () =>
           title: 'AutoPulse presentation in Supabase',
           completed: false,
           priority: 'high',
+          estimateMinutes: 30,
           createdAt: '2026-10-25T08:00:00Z',
         },
       ]
@@ -132,6 +133,7 @@ describe('NOVA — Cloud Task Persistence, Hydration & Sync Status Suite', () =>
         title: 'AutoPulse presentation',
         completed: false,
         priority: 'high',
+        estimateMinutes: 30,
         createdAt: '2026-10-24T12:00:00Z',
       }
 
@@ -176,6 +178,7 @@ describe('NOVA — Cloud Task Persistence, Hydration & Sync Status Suite', () =>
           title: 'Existing commitments',
           completed: false,
           priority: 'medium',
+          estimateMinutes: 30,
           createdAt: '2026-10-24T00:00:00Z',
         },
       ]
@@ -186,6 +189,7 @@ describe('NOVA — Cloud Task Persistence, Hydration & Sync Status Suite', () =>
         title: 'Offline draft presentation',
         completed: false,
         priority: 'high',
+        estimateMinutes: 30,
         createdAt: new Date().toISOString(),
       }
 

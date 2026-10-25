@@ -45,6 +45,7 @@ export interface MemoryItem {
   category: string
   content: string
   dateAdded: string
+  createdAt?: string
   /** A short detail can be personal or scoped to one workspace. */
   workspaceId?: string
 }
@@ -52,7 +53,7 @@ export interface MemoryItem {
 export interface KnowledgeItem {
   id: string
   title: string
-  kind: 'Project notes' | 'Reference' | 'Personal note'
+  kind: 'Project notes' | 'Reference' | 'Personal note' | (string & {})
   content: string
   tags: string[]
   createdAt: string
@@ -64,9 +65,12 @@ export interface KnowledgeItem {
 export interface WorkspaceItem {
   id: string
   name: string
-  description: string
+  description?: string
   kind: 'Personal' | 'Project' | 'Research'
   createdAt: string
+  color?: string
+  icon?: string
+  taskCount?: number
 }
 
 export interface TaskDraft {

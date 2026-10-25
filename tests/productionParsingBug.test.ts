@@ -187,7 +187,7 @@ describe('NOVA — Production Parsing Bug & Regression Suite', () => {
           priority: draft.priority ?? 'medium',
           scheduledAt: draft.scheduledAt,
           estimateMinutes: draft.estimateMinutes ?? 30,
-          workspaceId: draft.workspaceId,
+          workspaceId: draft.workspaceId || undefined,
           completed: false,
           createdAt: new Date().toISOString(),
         }
@@ -344,7 +344,7 @@ describe('NOVA — Production Parsing Bug & Regression Suite', () => {
             priority: draft.priority ?? 'medium',
             scheduledAt: draft.scheduledAt,
             estimateMinutes: draft.estimateMinutes ?? 30,
-            workspaceId: draft.workspaceId,
+            workspaceId: draft.workspaceId || undefined,
             completed: false,
             createdAt: new Date().toISOString(),
           }

@@ -88,12 +88,12 @@ describe('Date & Time Regression Tests', () => {
   test('toDateTimeInput and fromDateTimeInput preserve local dates and timestamps', () => {
     // Date-only preservation
     assert.equal(toDateTimeInput('2026-10-24'), '2026-10-24T09:00')
-    assert.equal(fromDateTimeInput('2026-10-24', true), '2026-10-24')
+    assert.equal(fromDateTimeInput('2026-10-24'), '2026-10-24')
 
     // Timestamp with time
     const inputVal = '2026-10-24T14:30'
-    const stored = fromDateTimeInput(inputVal, false)
-    assert.ok(stored.startsWith('2026-10-24T'))
+    const stored = fromDateTimeInput(inputVal)
+    assert.ok(stored && stored.startsWith('2026-10-24T'))
   })
 
   test('formatRelativeTime produces accurate relative labels without regressing to Just now', () => {

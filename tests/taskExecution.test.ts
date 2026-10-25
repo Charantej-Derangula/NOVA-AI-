@@ -64,7 +64,7 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
           priority: draft.priority ?? 'medium',
           scheduledAt: draft.scheduledAt,
           estimateMinutes: draft.estimateMinutes ?? 30,
-          workspaceId: draft.workspaceId,
+          workspaceId: draft.workspaceId || undefined,
           createdAt: new Date().toISOString(),
         }
         tasks.push(newTask)
@@ -266,6 +266,7 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
         title: 'Review research notes',
         completed: false,
         priority: 'medium',
+        estimateMinutes: 30,
         createdAt: '2026-10-24T08:00:00Z',
       }
       const task2: TaskItem = {
@@ -273,6 +274,7 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
         title: 'Review research notes',
         completed: false,
         priority: 'medium',
+        estimateMinutes: 30,
         createdAt: '2026-10-24T09:00:00Z', // Newest duplicate
       }
       tasks.push(task1, task2)
@@ -300,6 +302,7 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
           title: 'Engineering team meeting',
           completed: false,
           priority: 'medium',
+          estimateMinutes: 30,
           createdAt: '2026-10-24T08:00:00Z',
         },
         {
@@ -307,6 +310,7 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
           title: 'Client sync meeting',
           completed: false,
           priority: 'high',
+          estimateMinutes: 30,
           createdAt: '2026-10-24T09:00:00Z',
         }
       )
@@ -328,8 +332,8 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
 
     it('matches exact task title when available rather than throwing ambiguous error', () => {
       const candidates: TaskItem[] = [
-        { id: '1', title: 'Submit report', completed: false, priority: 'medium', createdAt: '' },
-        { id: '2', title: 'Submit report to manager', completed: false, priority: 'high', createdAt: '' },
+        { id: '1', title: 'Submit report', completed: false, priority: 'medium', estimateMinutes: 30, createdAt: '' },
+        { id: '2', title: 'Submit report to manager', completed: false, priority: 'high', estimateMinutes: 30, createdAt: '' },
       ]
       const matched = matchTasks(candidates, 'Submit report')
       assert.ok(matched.exactMatch)
@@ -409,9 +413,9 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
       const today = new Date()
       const todayKey = localDateKey(today)
       const testTasks: TaskItem[] = [
-        { id: '1', title: 'Today Task', completed: false, priority: 'high', scheduledAt: todayKey, createdAt: '' },
-        { id: '2', title: 'Future Task', completed: false, priority: 'low', scheduledAt: '2099-01-01', createdAt: '' },
-        { id: '3', title: 'Unscheduled', completed: false, priority: 'medium', createdAt: '' },
+        { id: '1', title: 'Today Task', completed: false, priority: 'high', scheduledAt: todayKey, estimateMinutes: 30, createdAt: '' },
+        { id: '2', title: 'Future Task', completed: false, priority: 'low', scheduledAt: '2099-01-01', estimateMinutes: 30, createdAt: '' },
+        { id: '3', title: 'Unscheduled', completed: false, priority: 'medium', estimateMinutes: 30, createdAt: '' },
       ]
 
       const myDayTasks = testTasks.filter((t) => isOnLocalDate(t.scheduledAt, today))
@@ -449,6 +453,7 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
         title: 'Review flight itinerary',
         completed: false,
         priority: 'medium',
+        estimateMinutes: 30,
         createdAt: '2026-10-25T08:00:00Z',
       })
 
@@ -474,8 +479,9 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
           id: 'task-ov-1',
           title: 'Overdue voice task',
           completed: false,
-          priority: 'urgent',
+          priority: 'high',
           scheduledAt: '2026-10-20',
+          estimateMinutes: 30,
           createdAt: '',
         },
         {
@@ -484,6 +490,7 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
           completed: false,
           priority: 'low',
           scheduledAt: '2026-10-30',
+          estimateMinutes: 30,
           createdAt: '',
         }
       )
@@ -506,7 +513,7 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
 
   describe('7. Authentication & Ownership Verification', () => {
     it('authenticates user context and links created task correctly', async () => {
-      let passedUser: typeof currentUser | undefined
+      let passedUser: ActionEngineContext['currentUser']
       const ctx = createTestContext({
         prompt: 'Create task: User auth check',
         currentUser,
@@ -517,6 +524,7 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
             title: draft.title,
             completed: false,
             priority: 'medium',
+            estimateMinutes: 30,
             createdAt: new Date().toISOString(),
           }
           tasks.push(newTask)
@@ -547,6 +555,7 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
             title: draft.title,
             completed: false,
             priority: draft.priority ?? 'medium',
+            estimateMinutes: 30,
             createdAt: new Date().toISOString(),
           }
           savedTask = newTask
@@ -579,6 +588,7 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
         title: 'audit guest telemetry',
         completed: false,
         priority: 'medium',
+        estimateMinutes: 30,
         createdAt: new Date().toISOString(),
       })
       mockStorage.setItem('nova:tasks:v1', JSON.stringify(tasks))
@@ -650,6 +660,7 @@ describe('NOVA Production-Ready Task Execution Suite', () => {
             title: draft.title,
             completed: false,
             priority: draft.priority ?? 'high',
+            estimateMinutes: 30,
             createdAt: new Date().toISOString(),
           }
           tasks.push(newTask)

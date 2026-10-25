@@ -103,7 +103,7 @@ export const WorkspacesView: React.FC<WorkspacesViewProps> = ({
   const openEditForm = (space: WorkspaceItem) => {
     setEditingWorkspace(space)
     setName(space.name)
-    setDescription(space.description)
+    setDescription(space.description || '')
     setKind(space.kind)
     setFormError('')
     setIsFormOpen(true)

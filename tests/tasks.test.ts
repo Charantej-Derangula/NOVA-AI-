@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
-import type { TaskItem } from '../src/types.ts'
+import type { TaskItem } from '../src/types/index.ts'
 import { getLocalDateKey, isOnLocalDate } from '../src/utils/dateTime.ts'
 
 describe('Tasks Data & Grouping Regression Tests', () => {

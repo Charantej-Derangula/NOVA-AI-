@@ -22,6 +22,7 @@ const dummyMemory: MemoryItem = {
   id: 'mem-dummy',
   content: 'dummy',
   category: 'Context',
+  dateAdded: 'Oct 25, 2026',
   createdAt: new Date().toISOString(),
 }
 
@@ -30,6 +31,7 @@ const dummyKnowledge: KnowledgeItem = {
   title: 'dummy',
   content: 'dummy',
   kind: 'Personal note',
+  tags: [],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 }
@@ -37,6 +39,7 @@ const dummyKnowledge: KnowledgeItem = {
 const dummyWorkspace: WorkspaceItem = {
   id: 'ws-dummy',
   name: 'dummy',
+  description: '',
   kind: 'Project',
   createdAt: new Date().toISOString(),
 }
@@ -45,6 +48,8 @@ const dummyTask: TaskItem = {
   id: 'task-dummy',
   title: 'dummy',
   completed: false,
+  priority: 'medium',
+  estimateMinutes: 30,
   createdAt: new Date().toISOString(),
 }
 
@@ -64,10 +69,13 @@ describe('Voice Action Execution & Deduplication Tests', () => {
     assert.ok(saveNoteDef.parameters.properties.workspaceId, 'save_note must accept workspaceId')
   })
 
-  test('Voice system instruction forbids refusal and explicitly commands tool invocation for tasks and notes', () => {
-    assert.match(voiceSrc, /create_task:\s*Call this tool when the user asks to create/i)
-    assert.match(voiceSrc, /save_note:\s*Call this tool when the user asks to save a note/i)
-    assert.match(voiceSrc, /NEVER say you do not have the ability to create tasks/i)
+  test('Voice system instruction routes supported operations through shared tools and confirms only success', () => {
+    assert.match(voiceSrc, /Tasks: Use create_task, list_tasks, complete_task, update_task, delete_task/i)
+    assert.match(voiceSrc, /Workspaces: Use create_workspace, switch_workspace, update_workspace, and delete_workspace/i)
+    assert.match(voiceSrc, /Knowledge: Use save_note .* search_notes or delete_note/i)
+    assert.match(voiceSrc, /Memory: Use save_memory, list_memories, and delete_memory/i)
+    assert.match(voiceSrc, /shared action and persistence pipeline used by chat/i)
+    assert.match(voiceSrc, /NEVER claim, state, or confirm .* unless the tool was executed and returned successfully/i)
     assert.match(voiceSrc, /Wait for the tool execution response before speaking/i)
   })
 
@@ -110,7 +118,7 @@ describe('Voice Action Execution & Deduplication Tests', () => {
           priority: draft.priority,
           scheduledAt: draft.scheduledAt,
           estimateMinutes: draft.estimateMinutes,
-          workspaceId: draft.workspaceId,
+          workspaceId: draft.workspaceId || undefined,
           createdAt: new Date().toISOString(),
         }
         createdTasks.push(task)
@@ -250,6 +258,8 @@ describe('Voice Action Execution & Deduplication Tests', () => {
       tasks: [],
       memories: [],
       knowledge: [],
+      workspaces: [],
+      activeWorkspaceId: null,
       onAddTask: async () => dummyTask,
       onUpdateTask: async () => {},
       onDeleteTask: async () => {},

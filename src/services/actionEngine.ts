@@ -126,7 +126,7 @@ export interface ActionEngineContext {
   onAddKnowledge: (draft: Omit<KnowledgeItem, 'id' | 'createdAt'>) => Promise<KnowledgeItem | void> | KnowledgeItem | void
   onUpdateKnowledge?: (id: string, updates: Partial<KnowledgeItem>) => Promise<void> | void
   onDeleteKnowledge: (id: string) => Promise<void> | void
-  onAddWorkspace: (draft: Pick<WorkspaceItem, 'name' | 'description' | 'kind'>) => Promise<string | void> | string | void
+  onAddWorkspace: (draft: Pick<WorkspaceItem, 'name' | 'description' | 'kind'>) => Promise<string | WorkspaceItem | void> | string | WorkspaceItem | void
   onUpdateWorkspace?: (id: string, updates: Partial<WorkspaceItem>) => Promise<void> | void
   onDeleteWorkspace: (id: string) => Promise<void> | void
   onSelectWorkspace: (id: string | null) => void
@@ -1266,13 +1266,14 @@ export function extractStructuredActionDetails(
     // Standalone note utterances: "note", "personal note", "voice note", "create a note", etc.
     /^(?:please\s+)?(?:create|make|save|add|take)?\s*(?:a\s+)?(?:personal|project|quick|voice)?\s*note[.!?]*$/i.test(text)
 
-  const isReminder = /^(?:please\s+)?(?:in\s+[^,]+,\s*)?(?:remind\s+me\s+|set\s+(?:a\s+)?reminder\s+)/i.test(text)
+  const isReminder = /^(?:please\s+)?(?:in\s+[^,]+,\s*)?(?:remind\s+me(?:\s+to)?|set\s+(?:a\s+)?reminder)\b/i.test(text)
   const isTask =
     !isNote &&
     (isReminder ||
-      /^(?:please\s+)?(?:in\s+[^,]+,\s*)?(?:can\s+you\s+)?(?:create|add|schedule|set\s+up|make)\s+(?:a\s+)?(?:new\s+)?task\b/i.test(text) ||
-      /^(?:please\s+)?(?:add\s+to\s+(?:my\s+)?(?:tasks|todo|schedule|plan))\b/i.test(text) ||
-      /^(?:schedule\s+task)\b/i.test(text))
+      /^(?:please\s+)?(?:in\s+[^,]+,\s*)?(?:can\s+you\s+)?(?:create|add|schedule|set\s+up|set|make|put|insert|save)\s+(?:a\s+|an\s+)?(?:new\s+|quick\s+|urgent\s+|daily\s+|[a-zA-Z0-9_-]+\s+)?(?:task|reminder|to-do|todo)\b/i.test(text) ||
+      /^(?:please\s+)?(?:add|put)\s+(?:to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan)|.+?\s+to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan))\b/i.test(text) ||
+      /^(?:schedule\s+task\b|task\s*:|new\s+task\s*:|todo\s*:|to-do\s*:)/i.test(text) ||
+      /^(?:please\s+)?(?:can\s+you\s+)?(?:set|create|schedule)\s+(?:a\s+)?task\s+(?:for\s+(?:you|me)\s+to|to)\s+/i.test(text))
 
   if (!isNote && !isTask) {
     return {
@@ -1369,18 +1370,33 @@ export function extractStructuredActionDetails(
     }
   }
 
+  // Extract task descriptor if present, e.g. "grocery" in "create a grocery task at 8:00 AM"
+  const descriptorMatch = workingText.match(
+    /^(?:please\s+)?(?:can\s+you\s+)?(?:user\s+requested|requested|create|add|save|take|schedule|set\s+up|set|make|store|record)\s+(?:a\s+|an\s+)?(?:new\s+|quick\s+|urgent\s+|daily\s+)?([a-zA-Z0-9_-]+)\s+(?:task|reminder|to-do|todo)\b/i
+  )
+  const taskDescriptor =
+    descriptorMatch && !/^(?:new|quick|urgent|daily|personal|project|voice)$/i.test(descriptorMatch[1])
+      ? descriptorMatch[1]
+      : undefined
+
   // Strip action prefix if still present
   workingText = workingText
     .replace(
-      /^(?:please\s+)?(?:can\s+you\s+)?(?:user\s+requested|requested|create|add|save|take|schedule|set\s+up|make|store|record)\s+(?:a\s+|an\s+)?(?:new\s+|personal\s+|project\s+|quick\s+|voice\s+)?(?:note|knowledge|document|task|memo|voice\s+note|voice\s+memo)(?:\s*:\s*|\s+to\s+|\s+for\s+|\s+in\s+(?:my\s+)?personal|\s+|$)/i,
+      /^(?:please\s+)?(?:can\s+you\s+)?(?:user\s+requested|requested|create|add|save|take|schedule|set\s+up|set|make|store|record)\s+(?:a\s+|an\s+)?(?:new\s+|personal\s+|project\s+|quick\s+|voice\s+|urgent\s+|daily\s+|[a-zA-Z0-9_-]+\s+)?(?:note|knowledge|document|task|memo|voice\s+note|voice\s+memo)(?:\s+(?:for\s+(?:you|me)\s+to|to|for)\b|\s*:\s*|\s+in\s+(?:my\s+)?personal|\s+|$)/i,
       ''
     )
     .replace(/^(?:personal|project|quick|voice)?\s*(?:note|voice\s+note|voice\s+memo)(?:\s+in\s+(?:my\s+)?personal)?(?:\s*:\s*|\s+|$)/i, '')
     .replace(/^(?:in\s+(?:my\s+)?personal\s*,?\s*)/i, '')
-    .replace(/^(?:please\s+)?remind\s+me(?:\s+at\s+[^to]+)?\s+to\s+/i, '')
-    .replace(/^(?:please\s+)?set\s+(?:a\s+)?reminder(?:\s+at\s+[^to]+)?\s+to\s+/i, '')
-    .replace(/^(?:please\s+)?add\s+to\s+(?:my\s+)?(?:tasks|todo|schedule|plan)(?:\s*:\s*|\s+)/i, '')
+    .replace(/^(?:please\s+)?remind\s+me(?:\s+at\s+[^to]+)?\s+(?:to\s+)?/i, '')
+    .replace(/^(?:please\s+)?set\s+(?:a\s+)?reminder(?:\s+at\s+[^to]+)?\s+(?:to\s+)?/i, '')
+    .replace(/^(?:please\s+)?(?:add|put)\s+to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan)(?:\s*:\s*|\s+)/i, '')
+    .replace(/^(?:task|new\s+task|reminder|to-do|todo)\s*:\s*/i, '')
     .trim()
+
+  const addToTasksTrailingMatch = workingText.match(/^(?:add\s+|put\s+)?(.+?)\s+to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan)[.!?]*$/i)
+  if (addToTasksTrailingMatch) {
+    workingText = addToTasksTrailingMatch[1].trim()
+  }
 
   if (isNote) {
     // 3. Note Title & Content Extraction
@@ -1454,7 +1470,7 @@ export function extractStructuredActionDetails(
   const { scheduledAt, priority, estimateMinutes } = resolveSchedule(text)
 
   let taskTitle = workingText
-    .replace(/^(?:called|named|titled|to)\s+/i, '')
+    .replace(/^(?:called|named|titled|to|for)\s+/i, '')
     .replace(/\b(?:priority\s+(?:high|medium|low)|(?:high|medium|low)\s+priority|urgent|asap)\b/gi, '')
     .replace(/\b(?:for\s+\d+\s*(?:mins?|minutes?|hours?|hrs?|h))\b/gi, '')
     .replace(/\b(?:tomorrow|today|yesterday|on\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/gi, '')
@@ -1465,6 +1481,14 @@ export function extractStructuredActionDetails(
 
   taskTitle = cleanEntityTitle(taskTitle)
   taskTitle = taskTitle.replace(/\s+(?:at|for|on|by|with|to)$/i, '').replace(/[.,;:!?]+$/, '').trim()
+
+  if (!taskTitle && taskDescriptor) {
+    if (taskDescriptor.toLowerCase() === 'grocery') {
+      taskTitle = 'Buy groceries'
+    } else {
+      taskTitle = taskDescriptor.charAt(0).toUpperCase() + taskDescriptor.slice(1).toLowerCase()
+    }
+  }
 
   const isMalformed = isMalformedTitle(taskTitle)
 
@@ -1489,15 +1513,16 @@ export function cleanTaskTitle(text: string): string {
 
   let cleaned = text
     .replace(
-      /^(?:please\s+)?(?:can\s+you\s+)?(?:create|add|schedule|set\s+up|make)\s+(?:a\s+)?(?:new\s+)?task(?:\s*:\s*|\s+to\s+|\s+for\s+|\s+)/i,
+      /^(?:please\s+)?(?:can\s+you\s+)?(?:create|add|schedule|set\s+up|set|make|put)\s+(?:a\s+|an\s+)?(?:new\s+|quick\s+|urgent\s+|daily\s+|[a-zA-Z0-9_-]+\s+)?(?:task|reminder|to-do|todo)(?:\s+(?:for\s+(?:you|me)\s+to|to|for)\b|\s*:\s*|\s+)/i,
       ''
     )
-    .replace(/^(?:please\s+)?remind\s+me(?:\s+at\s+[^to]+)?\s+to\s+/i, '')
-    .replace(/^(?:please\s+)?set\s+(?:a\s+)?reminder(?:\s+at\s+[^to]+)?\s+to\s+/i, '')
+    .replace(/^(?:please\s+)?remind\s+me(?:\s+at\s+[^to]+)?\s+(?:to\s+)?/i, '')
+    .replace(/^(?:please\s+)?set\s+(?:a\s+)?reminder(?:\s+at\s+[^to]+)?\s+(?:to\s+)?/i, '')
     .replace(
-      /^(?:please\s+)?(?:add\s+to\s+(?:my\s+)?(?:tasks|todo|schedule|plan)(?:\s*:\s*|\s+))/i,
+      /^(?:please\s+)?(?:add|put)\s+to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan)(?:\s*:\s*|\s+)/i,
       ''
     )
+    .replace(/^(?:task|new\s+task|reminder|to-do|todo)\s*:\s*/i, '')
     .replace(
       /\b(?:priority\s+(?:high|medium|low)|(?:high|medium|low)\s+priority|urgent|asap)\b/gi,
       ''
@@ -1517,6 +1542,11 @@ export function cleanTaskTitle(text: string): string {
     )
     .replace(/\s+/g, ' ')
     .trim()
+
+  const addToTasksMatch = cleaned.match(/^(.+?)\s+to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan)[.!?]*$/i)
+  if (addToTasksMatch) {
+    cleaned = addToTasksMatch[1].trim()
+  }
 
   cleaned = cleanEntityTitle(cleaned)
   cleaned = cleaned.replace(/\s+(?:at|for|on|by|with|to)$/i, '').replace(/[.,;:!?]+$/, '').trim()
@@ -1702,14 +1732,15 @@ export function parseActionPlan(
   }
 
   // 4f. Create Task / Reminder
-  const isReminder = /^(?:please\s+)?(?:in\s+[^,]+,\s*)?(?:remind\s+me\s+|set\s+(?:a\s+)?reminder\s+)/i.test(lower)
+  const isReminder = /^(?:please\s+)?(?:in\s+[^,]+,\s*)?(?:remind\s+me(?:\s+to)?|set\s+(?:a\s+)?reminder)\b/i.test(lower)
   const isTaskCreation =
     isReminder ||
-    /^(?:please\s+)?(?:in\s+[^,]+,\s*)?(?:can\s+you\s+)?(?:create|add|schedule|set\s+up|make)\s+(?:a\s+)?(?:new\s+)?task\b/i.test(
+    /^(?:please\s+)?(?:in\s+[^,]+,\s*)?(?:can\s+you\s+)?(?:create|add|schedule|set\s+up|set|make|put|insert|save)\s+(?:a\s+|an\s+)?(?:new\s+|quick\s+|urgent\s+|daily\s+|[a-zA-Z0-9_-]+\s+)?(?:task|reminder|to-do|todo)\b/i.test(
       lower
     ) ||
-    /^(?:please\s+)?(?:add\s+to\s+(?:my\s+)?(?:tasks|todo|schedule|plan))\b/i.test(lower) ||
-    /^(?:schedule\s+task)\b/i.test(lower)
+    /^(?:please\s+)?(?:add|put)\s+(?:to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan)|.+?\s+to\s+(?:my\s+)?(?:tasks|todo|to-do|schedule|plan))\b/i.test(lower) ||
+    /^(?:schedule\s+task\b|task\s*:|new\s+task\s*:|todo\s*:|to-do\s*:)/i.test(lower) ||
+    /^(?:please\s+)?(?:can\s+you\s+)?(?:set|create|schedule)\s+(?:a\s+)?task\s+(?:for\s+(?:you|me)\s+to|to)\s+/i.test(lower)
 
   if (isTaskCreation) {
     const extractedTask = extractStructuredActionDetails(text, contextData?.workspaces)
@@ -1812,7 +1843,7 @@ export function parseActionPlan(
 
   // 6b. Create Memory
   const memoryCreateMatch = text.match(
-    /^(?:please\s+)?(?:remember\s+that\s+|remember\s*:\s*|add\s+to\s+memory\s*:\s*|save\s+memory\s*:\s*|keep\s+in\s+mind\s+that\s+)([\s\S]+)$/i
+    /^(?:please\s+)?(?:can\s+you\s+)?(?:remember\s+that\s+|remember\s*:\s*|remember\s+|add\s+to\s+memory\s*:\s*|add\s+to\s+memory\s+|save\s+memory\s*:\s*|save\s+to\s+memory\s*:\s*|save\s+(?:a\s+)?memory\s+that\s+|keep\s+in\s+mind\s+that\s+)([\s\S]+)$/i
   )
   if (memoryCreateMatch) {
     const memoryContent = memoryCreateMatch[1].trim().replace(/[.!?]+$/, '').trim()
@@ -1878,15 +1909,19 @@ export function parseActionPlan(
 
   // 7b. Create Workspace
   const wsCreateMatch = text.match(
-    /^(?:please\s+)?(?:create|add|make|set\s+up|start|new)\s+(?:a\s+|an\s+)?(?:new\s+)?workspace(?:\s*:\s*|\s+(?:for|named|called|titled)\s+|\s+)(?:["'“]([^"'”]+)["'”]|(.+))$/i
+    /^(?:please\s+)?(?:can\s+you\s+)?(?:create|add|make|set\s+up|start|new)\s+(?:a\s+|an\s+)?(?:new\s+)?workspace(?:\s*:\s*|\s+(?:for|named|called|titled)\s+|\s+)(?:["'“]([^"'”]+)["'”]|(.+))$/i
   ) || text.match(
-    /^(?:please\s+)?(?:create|add|make|set\s+up|start|new)\s+(?:a\s+|an\s+)?(?:new\s+)?workspace$/i
+    /^(?:please\s+)?(?:can\s+you\s+)?(?:create|add|make|set\s+up|start|new)\s+(?:a\s+|an\s+)?(?:new\s+)?workspace$/i
+  ) || text.match(
+    /^(?:workspace\s*:|new\s+workspace\s*:)\s*(.+)$/i
   )
   if (wsCreateMatch) {
     const raw = wsCreateMatch[1] || wsCreateMatch[2] || ''
     const name = cleanEntityTitle(raw)
     if (name) {
       return { entity: 'workspace', verb: 'create', rawPrompt: text, title: name }
+    } else {
+      return { entity: 'workspace', verb: 'create', rawPrompt: text, title: '' }
     }
   }
 
@@ -2842,9 +2877,8 @@ async function executeSingleAction(
       if (!name) {
         return {
           handled: true,
-          status: 'error',
-          error: 'Workspace name is required.',
-          response: 'Workspace creation failed: Name is required.',
+          status: 'needs_confirmation',
+          response: 'What would you like to name your new workspace? (e.g. "Create a workspace for Product Launch")',
         }
       }
 

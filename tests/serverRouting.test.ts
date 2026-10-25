@@ -15,10 +15,11 @@ function simulateRequest(
   bodyObj?: unknown
 ): Promise<SimulatedResponse> {
   return new Promise<SimulatedResponse>((resolve) => {
-    const req = new EventEmitter() as unknown as Record<string, unknown>
-    req.method = method
-    req.url = urlPath
-    req.headers = { host: 'localhost' }
+    const req = Object.assign(new EventEmitter(), {
+      method,
+      url: urlPath,
+      headers: { host: 'localhost' },
+    })
 
     let statusCode = 200
     const headers: Record<string, string> = {}
@@ -49,9 +50,9 @@ function simulateRequest(
 
     process.nextTick(() => {
       if (bodyObj !== undefined) {
-        (req as EventEmitter).emit('data', JSON.stringify(bodyObj))
+        req.emit('data', JSON.stringify(bodyObj))
       }
-      (req as EventEmitter).emit('end')
+      req.emit('end')
     })
   })
 }

@@ -769,7 +769,7 @@ export default function App() {
         setTasks((prev) => [newTask, ...prev.filter((t) => t.id !== newTask.id)])
         throw new Error(res.error || 'Failed to persist task to Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       setTasksSyncStatus('offline')
       setTasksSyncError('Authentication required to persist task to Supabase.')
       // Preserve local data
@@ -777,6 +777,7 @@ export default function App() {
       throw new Error('Authentication required to persist task to Supabase.')
     } else {
       setTasksSyncStatus('local')
+      setTasksSyncError(null)
     }
     setTasks((prev) => [newTask, ...prev.filter((t) => t.id !== newTask.id)])
     return newTask
@@ -799,7 +800,7 @@ export default function App() {
         setTasks((prev) => prev.map((task) => (task.id === id ? updatedTask : task)))
         throw new Error(res.error || 'Failed to update task in Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       setTasksSyncStatus('offline')
     } else {
       setTasksSyncStatus('local')
@@ -818,7 +819,7 @@ export default function App() {
         setTasksSyncError(res.error || 'Failed to remove task from Supabase.')
         throw new Error(res.error || 'Failed to remove task from Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       setTasksSyncStatus('offline')
     } else {
       setTasksSyncStatus('local')
@@ -837,7 +838,7 @@ export default function App() {
         setTasksSyncError(res.error || 'Failed to clear all tasks from Supabase.')
         throw new Error(res.error || 'Failed to clear all tasks from Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       setTasksSyncStatus('offline')
     } else {
       setTasksSyncStatus('local')
@@ -866,7 +867,7 @@ export default function App() {
         setMemories((prev) => [newMemory, ...prev.filter((m) => m.id !== newMemory.id)])
         throw new Error(res.error || 'Failed to persist memory to Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       setMemories((prev) => [newMemory, ...prev.filter((m) => m.id !== newMemory.id)])
       throw new Error('Authentication required to persist memory to Supabase.')
     }
@@ -880,7 +881,7 @@ export default function App() {
       if (!res.success) {
         throw new Error(res.error || 'Failed to remove memory from Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       throw new Error('Authentication required to remove memory from Supabase.')
     }
     setMemories((prev) => prev.filter((m) => m.id !== id))
@@ -896,7 +897,7 @@ export default function App() {
         setMemories((prev) => prev.map((memory) => (memory.id === id ? updatedMemory : memory)))
         throw new Error(res.error || 'Failed to update memory in Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       setMemories((prev) => prev.map((memory) => (memory.id === id ? updatedMemory : memory)))
       throw new Error('Authentication required to update memory in Supabase.')
     }
@@ -917,7 +918,7 @@ export default function App() {
       if (!res.success) {
         throw new Error(res.error || 'Failed to persist note to Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       throw new Error('Authentication required to persist note to Supabase.')
     }
     setKnowledge((previous) => [newNote, ...previous.filter((n) => n.id !== newNote.id)])
@@ -933,7 +934,7 @@ export default function App() {
       if (!res.success) {
         throw new Error(res.error || 'Failed to update note in Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       throw new Error('Authentication required to update note in Supabase.')
     }
     setKnowledge((previous) => previous.map((note) => (note.id === id ? updatedNote : note)))
@@ -945,7 +946,7 @@ export default function App() {
       if (!res.success) {
         throw new Error(res.error || 'Failed to remove note from Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       throw new Error('Authentication required to remove note from Supabase.')
     }
     setKnowledge((previous) => previous.filter((note) => note.id !== id))
@@ -961,7 +962,7 @@ export default function App() {
         setActiveWorkspaceId(workspace.id)
         throw new Error(res.error || 'Failed to persist workspace to Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       setWorkspaces((previous) => [workspace, ...previous.filter((w) => w.id !== workspace.id)])
       setActiveWorkspaceId(workspace.id)
       throw new Error('Authentication required to persist workspace to Supabase.')
@@ -981,7 +982,7 @@ export default function App() {
         setWorkspaces((previous) => previous.map((workspace) => (workspace.id === id ? updatedWorkspace : workspace)))
         throw new Error(res.error || 'Failed to update workspace in Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       setWorkspaces((previous) => previous.map((workspace) => (workspace.id === id ? updatedWorkspace : workspace)))
       throw new Error('Authentication required to update workspace in Supabase.')
     }
@@ -994,7 +995,7 @@ export default function App() {
       if (!res.success) {
         throw new Error(res.error || 'Failed to remove workspace from Supabase.')
       }
-    } else if (isSupabaseConfigured()) {
+    } else if (isSupabaseConfigured() && !isGuestMode && !currentUser) {
       throw new Error('Authentication required to remove workspace from Supabase.')
     }
     const remaining = workspaces.filter((workspace) => workspace.id !== id)
@@ -1211,7 +1212,7 @@ export default function App() {
       systemInstruction += '\n\nIMPORTANT: If the user asks about personal preferences, memories, or profile facts that are not provided in your system instructions or conversation history, honestly state that you do not have that on record yet.'
     }
 
-    systemInstruction += '\n\nOPERATIONAL DIRECTIVE: You are an action-oriented executive assistant. For simple requests to create workspaces, notes, memories, or tasks, execute immediately with sensible defaults. Never respond with questionnaires asking about third-party platforms, team members, permissions, boards, templates, or automations unless the user explicitly requested configuring those integrations. Keep responses concise and truthful.'
+    systemInstruction += '\n\nCRITICAL SYSTEM BOUNDARY: Real application operations (creating, updating, or deleting tasks, workspaces, notes, and memories) are executed exclusively by the authoritative system action engine. You CANNOT directly execute or commit database operations. You must NEVER claim, promise, or hallucinate that you have created, scheduled, saved, or updated a task, workspace, note, or memory item unless that action was already confirmed and provided in your context. If an action could not be executed or is missing required details, state honestly what is needed.'
 
     let accumulatedContent = prefixContent
 
@@ -1402,6 +1403,12 @@ export default function App() {
     }
     setCurrentUser(null)
     setIsGuestMode(false)
+    setActiveWorkspaceId(null)
+    setTasks([])
+    setMemories([])
+    setKnowledge([])
+    setWorkspaces([])
+    setSessions([])
     const liveStatus = await checkSupabaseConnection()
     setSupabaseStatus(liveStatus)
   }
@@ -1714,7 +1721,7 @@ export default function App() {
       {/* Standard Mobile Bottom Navigation - 100% removed during dedicated voice interaction */}
       {activeVoiceMode === null && (
         <nav className="mobile-tabbar" aria-label="Quick navigation" inert={isSidebarOpen}>
-          {([['home', 'Home'], ['chat', 'Chat'], ['my-day', 'My Day'], ['tasks', 'Tasks'], ['settings', 'Settings']] as const).map(([tab, label]) => {
+          {([['home', 'Home'], ['dashboard', 'Overview'], ['my-day', 'My Day'], ['tasks', 'Tasks'], ['settings', 'Settings']] as const).map(([tab, label]) => {
             const icons = { home: Home, dashboard: LayoutDashboard, 'my-day': Sun, chat: MessageCircle, tasks: CheckSquare, settings: Settings }
             const Icon = icons[tab]
             return <button key={tab} className={activeTab === tab ? 'current' : ''} onClick={() => handleSelectTab(tab)} aria-label={label}><Icon size={18} /><small>{label}</small></button>

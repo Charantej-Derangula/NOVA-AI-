@@ -288,6 +288,7 @@ describe('NOVA Unified Action Engine — Workspaces, Knowledge, Memory & Tasks S
         title: 'Review pitch deck',
         completed: false,
         priority: 'high',
+        estimateMinutes: 30,
         createdAt: new Date().toISOString(),
         workspaceId: wsId,
       })
@@ -534,6 +535,7 @@ describe('NOVA Unified Action Engine — Workspaces, Knowledge, Memory & Tasks S
         title: 'Important presentation',
         completed: false,
         priority: 'high',
+        estimateMinutes: 30,
         createdAt: new Date().toISOString(),
       })
 
@@ -552,6 +554,7 @@ describe('NOVA Unified Action Engine — Workspaces, Knowledge, Memory & Tasks S
         title: 'Important presentation',
         completed: false,
         priority: 'high',
+        estimateMinutes: 30,
         createdAt: new Date().toISOString(),
       })
 

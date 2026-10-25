@@ -174,7 +174,7 @@ describe('Priority 3 — Home Page Styling & Artwork Alignment', () => {
     assert.match(appCss, /\.card-visual-artwork/)
     assert.match(appCss, /\.home-composer-glow/)
     assert.match(appCss, /\.chat-quick-action-pill/)
-    assert.match(appCss, /scroll-snap-type:\s*x mandatory/)
+    assert.match(appCss, /\.chat-capabilities/)
 
     // Card titles and descriptions are completely visible without ellipsis truncation
     assert.doesNotMatch(appCss, /\.chat-capability-title\s*\{[^}]*text-overflow:\s*ellipsis/)

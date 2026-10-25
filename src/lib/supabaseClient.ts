@@ -3,14 +3,27 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 let clientInstance: SupabaseClient | null = null
 let currentConfigKey = ''
 
+function cleanEnvString(val: unknown): string | undefined {
+  if (typeof val !== 'string') return undefined
+  const cleaned = val.replace(/^['"]|['"]$/g, '').trim()
+  return cleaned.length > 0 ? cleaned : undefined
+}
+
 /**
  * Safely retrieve an environment variable in both browser (Vite) and Node.js environments.
  */
 function getEnvVar(name: string): string | undefined {
   try {
-    // 1. Check Vite import.meta.env
-    if (typeof import.meta !== 'undefined' && import.meta.env && typeof import.meta.env[name] === 'string') {
-      return import.meta.env[name]
+    // 1. Static access for Vite compile-time substitution
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      if (name === 'VITE_SUPABASE_URL') return cleanEnvString(import.meta.env.VITE_SUPABASE_URL)
+      if (name === 'VITE_SUPABASE_ANON_KEY') return cleanEnvString(import.meta.env.VITE_SUPABASE_ANON_KEY)
+      if (name === 'VITE_SUPABASE_PUBLISHABLE_KEY') return cleanEnvString(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY)
+      if (name === 'VITE_SUPABASE_KEY') return cleanEnvString(import.meta.env.VITE_SUPABASE_KEY)
+      const envRecord = import.meta.env as Record<string, unknown>
+      if (typeof envRecord[name] === 'string') {
+        return cleanEnvString(envRecord[name])
+      }
     }
   } catch {
     // Ignore in non-Vite environments
@@ -18,8 +31,11 @@ function getEnvVar(name: string): string | undefined {
 
   try {
     // 2. Check Node.js process.env
-    if (typeof process !== 'undefined' && process.env && typeof process.env[name] === 'string') {
-      return process.env[name]
+    if (typeof process !== 'undefined' && process.env) {
+      const proc = process.env as Record<string, string | undefined>
+      if (typeof proc[name] === 'string') {
+        return cleanEnvString(proc[name])
+      }
     }
   } catch {
     // Ignore
@@ -79,18 +95,18 @@ export function getSupabaseUrl(): string | undefined {
 
 /**
  * Safely retrieve the Supabase Public / Anon / Publishable key from available environment variables.
- * Supports both modern Supabase publishable keys (VITE_SUPABASE_PUBLISHABLE_KEY / sb_publishable_...)
- * and legacy anon keys (VITE_SUPABASE_ANON_KEY / eyJ...).
+ * Prioritizes standard JWT anon keys (starting with "eyJ") for universal PostgREST compatibility.
  */
 export function getSupabaseKey(): string | undefined {
-  return (
-    getEnvVar('VITE_SUPABASE_PUBLISHABLE_KEY') ||
-    getEnvVar('VITE_SUPABASE_ANON_KEY') ||
-    getEnvVar('VITE_SUPABASE_KEY') ||
-    getEnvVar('SUPABASE_PUBLISHABLE_KEY') ||
-    getEnvVar('SUPABASE_ANON_KEY') ||
-    getEnvVar('SUPABASE_KEY')
-  )
+  const anonKey = getEnvVar('VITE_SUPABASE_ANON_KEY') || getEnvVar('SUPABASE_ANON_KEY')
+  const publishableKey = getEnvVar('VITE_SUPABASE_PUBLISHABLE_KEY') || getEnvVar('SUPABASE_PUBLISHABLE_KEY')
+  const fallbackKey = getEnvVar('VITE_SUPABASE_KEY') || getEnvVar('SUPABASE_KEY')
+
+  if (anonKey && anonKey.startsWith('eyJ')) {
+    return anonKey
+  }
+
+  return publishableKey || anonKey || fallbackKey
 }
 
 /**
@@ -256,7 +272,7 @@ export async function checkSupabaseConnection(): Promise<SupabaseConfigStatus> {
           ...baseStatus,
           connectionState: 'auth_error',
           statusMessage:
-            'Authentication failed: Supabase rejected the provided API key (401 Unauthorized). Check VITE_SUPABASE_ANON_KEY / VITE_SUPABASE_PUBLISHABLE_KEY in .env.',
+            'Authentication failed: Supabase rejected the provided API key (401 Unauthorized). Verify that VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (or VITE_SUPABASE_PUBLISHABLE_KEY) in Vercel project environment variables match the Project URL and API key from the same project in your Supabase Dashboard.',
           error: 'Authentication failed (401)',
         }
       }

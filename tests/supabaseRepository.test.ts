@@ -586,6 +586,7 @@ describe('Supabase Repository & Persistence Test Suite', () => {
         title: 'Read Write Task Test',
         completed: false,
         priority: 'high',
+        estimateMinutes: 30,
         createdAt: new Date().toISOString(),
       }
       const taskWriteRes = await persistTask(testTask)

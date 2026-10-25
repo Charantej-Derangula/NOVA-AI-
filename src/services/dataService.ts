@@ -64,6 +64,7 @@ export interface PersistenceResult<T> {
 }
 
 export interface TaskRow {
+  [key: string]: unknown
   id: string
   user_id: string
   workspace_id?: string | null
@@ -78,6 +79,7 @@ export interface TaskRow {
 }
 
 export interface KnowledgeRow {
+  [key: string]: unknown
   id: string
   user_id: string
   workspace_id?: string | null
@@ -90,6 +92,7 @@ export interface KnowledgeRow {
 }
 
 export interface MemoryRow {
+  [key: string]: unknown
   id: string
   user_id: string
   workspace_id?: string | null
@@ -101,6 +104,7 @@ export interface MemoryRow {
 }
 
 export interface WorkspaceRow {
+  [key: string]: unknown
   id: string
   user_id: string
   name: string

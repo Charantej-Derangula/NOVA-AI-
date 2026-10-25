@@ -186,18 +186,18 @@ test('H. Action Engine: Detects explicit user preference and handles conversatio
     knowledge: [],
     workspaces: [],
     activeWorkspaceId: null,
-    onAddTask: async () => ({ id: 't1', title: '', priority: 'medium', completed: false, createdAt: '' }),
+    onAddTask: async () => ({ id: 't1', title: '', priority: 'medium', estimateMinutes: 30, completed: false, createdAt: '' }),
     onUpdateTask: async () => {},
     onDeleteTask: async () => {},
     onToggleTask: async () => {},
-    onDeleteAllTasks: async () => 0,
+    onDeleteAllTasks: async () => {},
     onAddMemory: async (category, content) => {
       addedMemories.push({ category, content })
       return { id: 'mem-robotics-auto', category, content, dateAdded: 'Today' }
     },
     onUpdateMemory: async () => {},
     onDeleteMemory: async () => {},
-    onAddKnowledge: async () => ({ id: 'k1', title: '', kind: 'Personal note', content: '', createdAt: '' }),
+    onAddKnowledge: async () => ({ id: 'k1', title: '', kind: 'Personal note', content: '', tags: [], createdAt: '' }),
     onUpdateKnowledge: async () => {},
     onDeleteKnowledge: async () => {},
     onAddWorkspace: async () => ({ id: 'w1', name: '', kind: 'Project', createdAt: '' }),

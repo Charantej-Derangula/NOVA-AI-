@@ -97,7 +97,7 @@ export const getLocalDateKey = (value?: string | Date | null): string => {
 /**
  * Check if a date string or timestamp falls on a specific local calendar date.
  */
-export const isOnLocalDate = (value: string | undefined, date: Date = new Date()): boolean => {
+export const isOnLocalDate = (value: string | Date | undefined | null, date: Date = new Date()): boolean => {
   if (!value) return false
   const itemKey = getLocalDateKey(value)
   const targetKey = localDateKey(date)

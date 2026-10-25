@@ -160,12 +160,11 @@ describe('Server Chat Service & Groq Integration Tests', () => {
 
     const originalFetch = globalThis.fetch
     try {
-      // @ts-expect-error Mock fetch
-      globalThis.fetch = async () =>
+      globalThis.fetch = (async () =>
         new Response(sseBody, {
           status: 200,
           headers: { 'Content-Type': 'text/event-stream' },
-        })
+        })) as typeof fetch
 
       const chunks: string[] = []
       let completed = false
@@ -220,12 +219,11 @@ describe('Server Chat Service & Groq Integration Tests', () => {
 
     const originalFetch = globalThis.fetch
     try {
-      // @ts-expect-error Mock fetch
-      globalThis.fetch = async () =>
+      globalThis.fetch = (async () =>
         new Response(JSON.stringify({ error: 'Server GROQ_API_KEY is not configured.' }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' },
-        })
+        })) as typeof fetch
 
       let completed = false
       let errorMessage = ''

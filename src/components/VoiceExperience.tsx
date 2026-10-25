@@ -553,7 +553,7 @@ export const VoiceExperience: React.FC<VoiceExperienceProps> = ({
         if (data.code === 'MISSING_API_KEY') {
           if (mode === 'sts') {
             setState('error')
-            setErrorMessage('GEMINI_API_KEY is not configured on the server. Please add your GEMINI_API_KEY to .env to enable real Gemini Live Speech-to-Speech.')
+            setErrorMessage('GEMINI_API_KEY is not configured on the server. Please add GEMINI_API_KEY to your environment variables (or Vercel project settings) to enable Gemini Live voice.')
             return
           } else {
             setIsFallbackSTT(true)
@@ -574,7 +574,7 @@ export const VoiceExperience: React.FC<VoiceExperienceProps> = ({
     } catch {
       if (mode === 'sts') {
         setState('error')
-        setErrorMessage('Could not reach backend /api/live-token. Ensure the local dev server is running.')
+        setErrorMessage('Could not reach voice token service at /api/live-token. If deployed on Vercel, verify that the serverless API function is deployed and GEMINI_API_KEY is configured in project settings.')
         return
       } else {
         setIsFallbackSTT(true)
@@ -605,15 +605,14 @@ NOVA BUILT-IN CAPABILITIES & INTERNAL KNOWLEDGE:
 - "in my personal" means save a personal note (kind: "Personal note") in the user's default/personal workspace. Do NOT set workspaceName unless the user explicitly names a workspace.
 
 TOOL DEFINITIONS & USAGE:
-- create_task: Call this tool when the user asks to create, add, or schedule a task (e.g. "Create a task called Voice Test QA in Product Launch"). Pass the title and optional workspaceName (or workspaceId).
-- list_tasks: Call this tool to list, find, or check user tasks.
-- complete_task: Call this tool to complete a task.
-- save_note: Call this tool when the user asks to save a note or knowledge (e.g. "Save a personal note titled Voice with body voice is perfect" or "Create a note called Voice Test. The content is voice is working."). Pass title (string), content or body (string), kind ("Personal note", "Project notes", or "Reference"), and optional workspaceName.
-- search_notes: Call this tool to search user notes.
-- save_memory: Call this tool to store long-term preferences or facts.
+- Tasks: Use create_task, list_tasks, complete_task, update_task, delete_task, or delete_all_tasks for task requests. Include scheduling, priority, estimate, and workspace association when the user provides them. delete_all_tasks requires explicit confirmation.
+- Workspaces: Use create_workspace, switch_workspace, update_workspace, and delete_workspace for workspace requests. Ask one concise follow-up only when a required name or target is missing. Never claim a workspace change before the tool succeeds.
+- Knowledge: Use save_note to create Knowledge items (title, content/body, kind, tags, and optional workspace); use search_notes or delete_note to retrieve or remove them.
+- Memory: Use save_memory, list_memories, and delete_memory for saved facts and preferences. Do not say a fact was remembered unless save_memory succeeds.
+- Use the matching NOVA tool for every requested operation instead of only describing the action. These tools execute through NOVA's shared action and persistence pipeline used by chat.
 
 CRITICAL INSTRUCTIONS:
-1. When the user asks you to create a task, save a note, or manage items and provides the details (e.g. "Create a note called Voice Test. The content is voice is working."):
+1. When the user asks you to create, read, update, complete, or delete a task, workspace, Knowledge item, or memory and provides the required details:
    Invoke the appropriate tool immediately. NEVER say you do not have the ability to create tasks, manage projects, or save notes.
 2. When the user asks to create or save a note or voice note (e.g. "voice note in my personal", "Note in my personal", "Create a personal note", "Make a note in my personal", "Save a voice note", "create a note") without title or content/body:
    Do NOT ask which app, program, or device they mean!

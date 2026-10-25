@@ -96,6 +96,7 @@ describe('NOVA — Five Real Workflows & Production Architecture Verification', 
           kind: draft.kind,
           tags: draft.tags,
           workspaceId: draft.workspaceId,
+          createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         }
         knowledge.push(newKnowledge)
@@ -111,22 +112,12 @@ describe('NOVA — Five Real Workflows & Production Architecture Verification', 
         if (!found) throw new Error(`Knowledge note with ID "${id}" does not exist.`)
         knowledge = knowledge.filter((k) => k.id !== id)
       },
-      onAddWorkspace: async (arg1, kind, color, icon) => {
-        const name =
-          typeof arg1 === 'object' && arg1 !== null && 'name' in arg1
-            ? String((arg1 as { name: string }).name)
-            : String(arg1)
-        const actualKind =
-          typeof arg1 === 'object' && arg1 !== null && 'kind' in arg1
-            ? String((arg1 as { kind?: string }).kind || 'General')
-            : (kind || 'General')
-
+      onAddWorkspace: async (draft: Pick<WorkspaceItem, 'name' | 'description' | 'kind'>) => {
         const newWorkspace: WorkspaceItem = {
           id: `ws-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-          name,
-          kind: actualKind,
-          color: color || '#6366F1',
-          icon: icon || 'Briefcase',
+          name: draft.name,
+          kind: draft.kind,
+          description: draft.description || '',
           createdAt: new Date().toISOString(),
         }
         workspaces.push(newWorkspace)
@@ -255,6 +246,7 @@ describe('NOVA — Five Real Workflows & Production Architecture Verification', 
         content: 'I am exploring robot navigation, sensors, and autonomous control.',
         kind: 'Personal note',
         tags: ['robotics'],
+        createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })
 
